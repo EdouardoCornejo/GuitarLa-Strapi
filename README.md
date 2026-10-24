@@ -85,6 +85,14 @@ API_TOKEN_SALT=valor_aleatorio
 ADMIN_JWT_SECRET=valor_aleatorio
 JWT_SECRET=valor_aleatorio
 
+# PostgreSQL (config/database.js)
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_NAME=guitarla
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=tu_password
+DATABASE_SSL=false
+
 # Cloudinary (config/plugins.js)
 CLOUDINARY_NAME=tu_cloud_name
 CLOUDINARY_KEY=tu_api_key
@@ -99,34 +107,23 @@ CLOUDINARY_SECRET=tu_api_secret
 | `API_TOKEN_SALT`    | `config/admin.js`      | Salt para los API tokens                       |
 | `ADMIN_JWT_SECRET`  | `config/admin.js`      | Secreto JWT del panel de administración        |
 | `JWT_SECRET`        | Users & Permissions    | Secreto JWT de los usuarios de la API          |
+| `DATABASE_HOST`     | `config/database.js`   | Host de PostgreSQL                             |
+| `DATABASE_PORT`     | `config/database.js`   | Puerto (por defecto `5432`)                    |
+| `DATABASE_NAME`     | `config/database.js`   | Nombre de la base de datos                     |
+| `DATABASE_USERNAME` | `config/database.js`   | Usuario de PostgreSQL                          |
+| `DATABASE_PASSWORD` | `config/database.js`   | Contraseña de PostgreSQL (sin valor por defecto) |
+| `DATABASE_SSL`      | `config/database.js`   | Conexión con SSL (por defecto `false`)         |
 | `CLOUDINARY_NAME`   | `config/plugins.js`    | Cloud name de Cloudinary                       |
 | `CLOUDINARY_KEY`    | `config/plugins.js`    | API key de Cloudinary                          |
 | `CLOUDINARY_SECRET` | `config/plugins.js`    | API secret de Cloudinary                       |
 
-> Las variables de Cloudinary no aparecen en `.env.example`, pero `config/plugins.js` las lee.
+El archivo `.env` está en `.gitignore`: nunca lo subas al repositorio. Para generar valores aleatorios para `APP_KEYS` y los secretos puedes usar `node -e "console.log(require('crypto').randomBytes(16).toString('base64'))"`.
 
 ### Base de datos
 
-El repositorio **no incluye `config/database.js`** (se eliminó del control de versiones). Para ejecutar el proyecto crea ese archivo con la conexión a PostgreSQL. Un ejemplo con el formato de Strapi 4:
+`config/database.js` configura el cliente `postgres` y lee toda la conexión de las variables `DATABASE_*` del `.env` (no hay credenciales en el código). Crea una base de datos vacía en PostgreSQL con el nombre de `DATABASE_NAME`; Strapi crea las tablas automáticamente al arrancar.
 
-```js
-// config/database.js
-module.exports = ({ env }) => ({
-  connection: {
-    client: 'postgres',
-    connection: {
-      host: env('DATABASE_HOST', '127.0.0.1'),
-      port: env.int('DATABASE_PORT', 5432),
-      database: env('DATABASE_NAME', 'guitarla'),
-      user: env('DATABASE_USERNAME', 'postgres'),
-      password: env('DATABASE_PASSWORD', ''),
-      ssl: env.bool('DATABASE_SSL', false),
-    },
-  },
-});
-```
-
-y añade las variables `DATABASE_*` correspondientes a tu `.env`. Strapi crea las tablas automáticamente al arrancar.
+Si la base de datos está en un servicio en la nube que exige SSL (por ejemplo, Render), usa `DATABASE_SSL=true`.
 
 ### Ejecutar en desarrollo
 
@@ -236,6 +233,7 @@ Cada tipo de contenido (`guitarra`, `post`, `curso`) sigue la estructura estánd
 ### 2. `config/`
 
 - `server.js` — host, puerto y `APP_KEYS`.
+- `database.js` — conexión a PostgreSQL con `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` y `DATABASE_SSL`.
 - `admin.js` — secreto JWT del panel y salt de los API tokens.
 - `api.js` — `defaultLimit: 25`, `maxLimit: 100`, `withCount: true`.
 - `plugins.js` — proveedor de subida `cloudinary` con `CLOUDINARY_NAME`, `CLOUDINARY_KEY` y `CLOUDINARY_SECRET`.
@@ -276,6 +274,7 @@ GuitarLa-Strapi/
 ├── config/
 │   ├── admin.js                 # JWT del panel y salt de API tokens
 │   ├── api.js                   # Límites de paginación REST
+│   ├── database.js              # Conexión a PostgreSQL (DATABASE_*)
 │   ├── middlewares.js           # CSP con Cloudinary
 │   ├── plugins.js               # Proveedor de subida Cloudinary
 │   └── server.js                # Host, puerto, APP_KEYS
@@ -293,7 +292,7 @@ GuitarLa-Strapi/
 │   │   └── post/
 │   ├── extensions/
 │   └── index.js                 # register / bootstrap
-├── .env.example
+├── .env.example                 # Plantilla de variables de entorno
 ├── favicon.png
 └── package.json
 ```
@@ -305,6 +304,7 @@ GuitarLa-Strapi/
 | Dónde                          | Qué                                   | Valor actual                           |
 | ------------------------------ | ------------------------------------- | -------------------------------------- |
 | `config/server.js`             | Host y puerto                         | `HOST` (`0.0.0.0`), `PORT` (`1337`)    |
+| `config/database.js`           | Conexión a la base de datos           | `postgres` con variables `DATABASE_*`  |
 | `config/api.js` → `rest`       | Paginación de la API                  | `defaultLimit: 25`, `maxLimit: 100`, `withCount: true` |
 | `config/plugins.js` → `upload` | Proveedor de archivos                 | `cloudinary`                           |
 | `config/middlewares.js`        | Orígenes permitidos para imágenes/media | `'self'`, `data:`, `blob:`, `dl.airtable.com`, `res.cloudinary.com` |
