@@ -32,6 +32,7 @@ Backend **headless CMS** de **GuitarLA**, una tienda de guitarras con blog, cons
   - [Cómo funciona](#cómo-funciona)
     - [1. `src/api/`](#1-srcapi)
     - [2. `config/`](#2-config)
+    - [3. `src/middlewares/invalid-query.js`](#3-srcmiddlewaresinvalid-queryjs)
     - [Flujo](#flujo)
   - [Tecnologías](#tecnologías)
   - [Estructura del proyecto](#estructura-del-proyecto)
@@ -251,7 +252,18 @@ Cada tipo de contenido (`guitarra`, `post`, `curso`) sigue la estructura estánd
 - `admin.js` — secreto JWT del panel y salt de los API tokens.
 - `api.js` — `defaultLimit: 25`, `maxLimit: 100`, `withCount: true`.
 - `plugins.js` — proveedor de subida `cloudinary` con `CLOUDINARY_NAME`, `CLOUDINARY_KEY` y `CLOUDINARY_SECRET`.
-- `middlewares.js` — middlewares por defecto con una CSP que añade `res.cloudinary.com` y `dl.airtable.com` a `img-src` y `media-src`.
+- `middlewares.js` — middlewares por defecto con una CSP que añade `res.cloudinary.com` y `dl.airtable.com` a `img-src` y `media-src`, más `global::invalid-query` justo después de `strapi::errors`.
+
+### 3. `src/middlewares/invalid-query.js`
+
+Strapi 4.5 no valida los ids, filtros ni campos de ordenación antes de consultar la base de datos, así que una petición malformada terminaba en `500 Internal Server Error`. Este middleware convierte esos casos en `400 ValidationError` (`Invalid query parameters`):
+
+| Petición                                 | Antes | Ahora |
+| ---------------------------------------- | ----- | ----- |
+| `GET /api/guitarras/abc`                 | `500` | `400` |
+| `GET /api/guitarras?filters[nope]=1`     | `500` | `400` |
+| `GET /api/guitarras?filters[precio][$foo]=1` | `500` | `400` |
+| `GET /api/guitarras?sort=color:asc`      | `500` | `400` |
 
 ### Flujo
 
@@ -307,6 +319,8 @@ GuitarLa-Strapi/
 │   │   └── post/
 │   ├── extensions/
 │   │   └── documentation/config/settings.json  # Info y servidor de la especificación OpenAPI
+│   ├── middlewares/
+│   │   └── invalid-query.js     # 400 en lugar de 500 ante ids, filtros u orden inválidos
 │   └── index.js                 # register / bootstrap
 ├── .env.example                 # Plantilla de variables de entorno
 ├── favicon.png

@@ -1,5 +1,7 @@
 module.exports = [
   'strapi::errors',
+  // Right after strapi::errors so the ValidationError it throws is formatted as a 400.
+  'global::invalid-query',
   {
     name: 'strapi::security',
     config: {
