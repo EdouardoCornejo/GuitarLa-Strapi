@@ -28,6 +28,7 @@ Backend **headless CMS** de **GuitarLA**, una tienda de guitarras con blog, cons
     - [Post (`api::post.post`)](#post-apipostpost)
     - [Cursos (`api::curso.curso`)](#cursos-apicursocurso)
   - [Endpoints](#endpoints)
+  - [Documentación de la API (OpenAPI)](#documentación-de-la-api-openapi)
   - [Cómo funciona](#cómo-funciona)
     - [1. `src/api/`](#1-srcapi)
     - [2. `config/`](#2-config)
@@ -50,6 +51,7 @@ Backend **headless CMS** de **GuitarLA**, una tienda de guitarras con blog, cons
 - **Content Security Policy** que permite cargar imágenes y media desde `res.cloudinary.com` en el panel.
 - **Paginación REST** por defecto de 25 elementos (máximo 100) e incluyendo el total (`withCount`).
 - Plugins **Users & Permissions** (roles y permisos de la API) e **i18n**.
+- **Documentación OpenAPI** con `@strapi/plugin-documentation`: Swagger UI en `/documentation` y especificación generada en cada arranque.
 
 ---
 
@@ -217,6 +219,18 @@ GET /api/curso?populate=imagen
 
 ---
 
+## Documentación de la API (OpenAPI)
+
+El plugin oficial `@strapi/plugin-documentation` (versión `4.5.0`, la misma que Strapi) inspecciona los tipos de contenido y las rutas, y genera una especificación **OpenAPI 3.0** en cada arranque:
+
+- **Swagger UI**: `http://localhost:1337/documentation` (o `/documentation/v1.0.0`). Desde *Settings → Documentation* del panel se puede proteger con contraseña o regenerar.
+- **Especificación**: `src/extensions/documentation/documentation/1.0.0/full_documentation.json`, junto con un fragmento por API en `src/api/<nombre>/documentation/1.0.0/` y por plugin en `src/extensions/<plugin>/documentation/1.0.0/` (`upload`, `email`, `users-permissions`).
+- **Personalización**: en Strapi 4.5 el plugin ignora `config/plugins.js` y fusiona `src/extensions/documentation/config/settings.json` sobre su configuración por defecto; ahí se definen el título, la descripción, el contacto, la licencia y el servidor (`http://localhost:1337/api`).
+
+Como todos esos archivos se regeneran al arrancar, están en `.gitignore`; solo se versiona `settings.json`.
+
+---
+
 ## Cómo funciona
 
 ### 1. `src/api/`
@@ -262,6 +276,7 @@ Panel de administración (/admin)
 - **@strapi/plugin-users-permissions** — roles y permisos de la API.
 - **@strapi/plugin-i18n** — internacionalización del contenido.
 - **@strapi/provider-upload-cloudinary** — almacenamiento de imágenes en Cloudinary.
+- **@strapi/plugin-documentation** — especificación OpenAPI y Swagger UI.
 - **PostgreSQL** mediante el driver **pg 8.6.0**.
 - **Node.js** 14–18.
 
@@ -291,6 +306,7 @@ GuitarLa-Strapi/
 │   │   ├── guitarra/
 │   │   └── post/
 │   ├── extensions/
+│   │   └── documentation/config/settings.json  # Info y servidor de la especificación OpenAPI
 │   └── index.js                 # register / bootstrap
 ├── .env.example                 # Plantilla de variables de entorno
 ├── favicon.png

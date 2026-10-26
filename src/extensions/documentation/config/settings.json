@@ -1,0 +1,26 @@
+{
+  "info": {
+    "title": "GuitarLA API",
+    "description": "API REST de Strapi para la tienda GuitarLA: guitarras, entradas del blog y el curso. Las rutas find y findOne son públicas; el resto requiere un API token.",
+    "termsOfService": "https://github.com/EdouardoCornejo/GuitarLa-Strapi",
+    "contact": {
+      "name": "Edouardo Cornejo",
+      "email": "",
+      "url": "https://github.com/EdouardoCornejo"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:1337/api",
+      "description": "Development server"
+    }
+  ],
+  "externalDocs": {
+    "description": "Strapi 4 REST API reference",
+    "url": "https://docs-v4.strapi.io/dev-docs/api/rest"
+  }
+}

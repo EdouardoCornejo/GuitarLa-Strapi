@@ -114,3 +114,8 @@ exports
 dist
 build
 .strapi-updater.json
+
+# Documentation plugin output, regenerated on every start
+src/api/*/documentation/
+src/extensions/*/documentation/
+src/extensions/documentation/public/
